@@ -3,8 +3,68 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ugym.admin.dao.MotionDao">
 
-    <select id="getMotionData" resultType="com.ugym.admin.bean.Motion">
+    <select id="getMotionDataByMonth" resultType="com.ugym.admin.bean.Motion" parameterType="Integer">
         SELECT
+          motion.uid,
+          motion.sum_duration,
+          motion.sum_distance,
+          user_profile.nickname,
+          user_profile.avatar
+        FROM
+          (SELECT
+             uid,
+             sum(duration) sum_duration,
+             sum(distance) sum_distance
+           FROM fitness_data
+            WHERE MONTH(created_time) = #{month} -- 2017 几月
+              AND YEAR(created_time) = 2017
+           GROUP BY uid
+           ORDER BY sum_duration DESC) motion,user_profile
+        WHERE motion.uid = user_profile.uid
+    </select>
+
+    <select id="getMotionDataByWeekDay" resultType="com.ugym.admin.bean.Motion" parameterType="int">
+         SELECT
+          motion.uid,
+          motion.sum_duration,
+          motion.sum_distance,
+          user_profile.nickname,
+          user_profile.avatar
+        FROM
+          (SELECT
+             uid,
+             sum(duration) sum_duration,
+             sum(distance) sum_distance
+           FROM fitness_data
+            WHERE WEEKDAY(created_time)+1 = #{weekDay}   -- 2017 几月几周
+              AND MONTH(created_time) = #{month}
+              AND YEAR(created_time) = 2017
+           GROUP BY uid
+           ORDER BY sum_duration DESC) motion,user_profile
+        WHERE motion.uid = user_profile.uid
+    </select>
+    <select id="getMotionDataByDay" resultType="com.ugym.admin.bean.Motion" parameterType="int">
+        SELECT
+          motion.uid,
+          motion.sum_duration,
+          motion.sum_distance,
+          user_profile.nickname,
+          user_profile.avatar
+        FROM
+          (SELECT
+             uid,
+             sum(duration) sum_duration,
+             sum(distance) sum_distance
+           FROM fitness_data
+            WHERE DAY(created_time)+1 = #{day} -- 2017 几月几号
+              AND MONTH(created_time) = #{month}
+              AND YEAR(created_time) = 2017
+           GROUP BY uid
+           ORDER BY sum_duration DESC) motion,user_profile
+        WHERE motion.uid = user_profile.uid
+    </select>
+    <select id="getAllMotionData" resultType="com.ugym.admin.bean.Motion">
+         SELECT
           motion.uid,
           motion.sum_duration,
           motion.sum_distance,

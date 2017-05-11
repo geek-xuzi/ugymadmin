@@ -2,6 +2,7 @@ package com.ugym.admin.dao;
 
 import com.ugym.admin.bean.Motion;
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @author zheng.xu
@@ -9,5 +10,11 @@ import java.util.List;
  */
 public interface MotionDao {
 
-    List<Motion> getMotionData();
+    List<Motion> getMotionDataByMonth(@Param("month") Integer month);
+
+    List<Motion> getMotionDataByWeekDay(@Param("weekDay") Integer weekDay, @Param("month") int month);
+
+    List<Motion> getMotionDataByDay(@Param("day") Integer day, @Param("month") Integer month);
+
+    List<Motion> getAllMotionData();
 }

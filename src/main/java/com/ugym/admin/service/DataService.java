@@ -8,5 +8,11 @@ import java.util.List;
  */
 public interface DataService {
 
-    List<Motion> getData();
+    List<Motion> getMotionDataByMonth(int month);
+
+    List<Motion> getMotionDataByWeekDay(int weekDay, int month);
+
+    List<Motion> getMotionDataByDay(int day, int month);
+
+    List<Motion> getAllMotionData();
 }
