@@ -48,6 +48,7 @@
           <element id="library" level="project" name="Maven: com.jcraft:jsch:0.1.49" />
           <element id="library" level="project" name="Maven: junit:junit:4.9" />
           <element id="library" level="project" name="Maven: org.hamcrest:hamcrest-core:1.1" />
+          <element id="library" level="project" name="Maven: com.google.guava:guava:19.0" />
         </element>
       </element>
       <element id="directory" name="META-INF">
