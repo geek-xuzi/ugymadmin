@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ugym.admin.dao.MotionDao">
+
+    <select id="getMotionData" resultType="com.ugym.admin.bean.Motion">
+        SELECT
+          motion.uid,
+          motion.sum_duration,
+          motion.sum_distance,
+          user_profile.nickname,
+          user_profile.avatar
+        FROM
+          (SELECT
+             uid,
+             sum(duration) sum_duration,
+             sum(distance) sum_distance
+           FROM fitness_data
+           GROUP BY uid
+           ORDER BY sum_duration DESC) motion,user_profile
+        WHERE motion.uid = user_profile.uid
+    </select>
+
+</mapper>

@@ -1,10 +1,12 @@
 package com.ugym.admin.service;
 
-import java.util.Map;
+import com.ugym.admin.bean.Motion;
+import java.util.List;
 
 /**
  * Created by xuzi on 2017/5/10.
  */
 public interface DataService {
-    Map getData();
+
+    List<Motion> getData();
 }
