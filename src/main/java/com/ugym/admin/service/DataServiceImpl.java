@@ -1,5 +1,9 @@
 package com.ugym.admin.service;
 
+import com.alibaba.druid.support.json.JSONParser;
+import com.alibaba.druid.support.json.JSONUtils;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -34,14 +38,16 @@ public class DataServiceImpl implements DataService {
                     return motionDao.getAllMotionData();
                 }
             });
-    private LoadingCache<CacheKey, List<Motion>> monthMotionCache = CacheBuilder.newBuilder()
+    private LoadingCache<String, List<Motion>> monthMotionCache = CacheBuilder.newBuilder()
             .expireAfterAccess(EXPIRE, TimeUnit.MILLISECONDS).maximumSize(100)
-            .build(new CacheLoader<CacheKey, List<Motion>>() {
-                @Override
-                public List<Motion> load(CacheKey key) throws Exception {
-                    return motionDao.getMotionDataByMonth(key.getMonth());
-                }
-            });
+            .build(new CacheLoader<String, List<Motion>>() {
+                       @Override
+                       public List<Motion> load(String key) throws Exception {
+
+                           return motionDao.getMotionDataByMonth(5);
+                       }
+                   }
+            );
 
     private LoadingCache<CacheKey, List<Motion>> weekDayMotionCache = CacheBuilder.newBuilder()
             .expireAfterAccess(EXPIRE, TimeUnit.MILLISECONDS).maximumSize(100)
@@ -80,10 +86,11 @@ public class DataServiceImpl implements DataService {
             @Override
             protected List getDataByCache() throws ExecutionException {
 
-                return monthMotionCache.get(new CacheKey(month, -1, -1));
+                return monthMotionCache.get("");
             }
         }.executor();
     }
+
     // ok
     @Override
     public List<Motion> getMotionDataByWeekDay(int weekDay, int month) {
