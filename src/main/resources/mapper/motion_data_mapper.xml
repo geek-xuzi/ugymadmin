@@ -3,7 +3,8 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ugym.admin.dao.MotionDao">
 
-    <select id="getMotionDataByMonth" resultType="com.ugym.admin.bean.Motion" parameterType="Integer">
+    <select id="getMotionDataByMonth" resultType="com.ugym.admin.bean.Motion"
+      parameterType="Integer">
         SELECT
           motion.uid,
           motion.sum_duration,
@@ -81,4 +82,29 @@
         WHERE motion.uid = user_profile.uid
     </select>
 
+    <select id="getAllData" resultType="com.ugym.admin.bean.OrderData">
+      SELECT
+          a.order_id,
+          a.data `order_product`,
+          b.data `main_order`,
+          a.create_date,
+      FROM
+        (SELECT order_id,data,create_date FROM order_detail WHERE section = 'order-product') a,
+        (SELECT order_id,data FROM order_detail WHERE section = 'main-order') b
+      WHERE a.order_id = b.order_id
+    </select>
+    <select id="getData" resultType="com.ugym.admin.bean.OrderData">
+    SELECT
+  a.order_id,
+  a.data `order_product`,
+  b.data `main_order`,
+  a.create_date
+FROM
+  (SELECT order_id,data,create_date FROM order_detail WHERE section = 'order-product') a,
+  (SELECT order_id,data FROM order_detail WHERE section = 'main-order') b
+WHERE a.order_id = b.order_id AND to_days(create_date) = to_days(now())  LIMIT #{start},#{end}
+    </select>
+    <select id="getCount" resultType="java.lang.Integer">
+      SELECT count(*) from order_detail WHERE to_days(update_time) = to_days(now())
+    </select>
 </mapper>

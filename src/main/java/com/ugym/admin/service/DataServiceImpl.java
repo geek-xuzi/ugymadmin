@@ -1,16 +1,33 @@
 package com.ugym.admin.service;
 
+import com.csvreader.CsvReader;
+import com.csvreader.CsvWriter;
+import com.github.pagehelper.PageHelper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
+import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 import com.ugym.admin.bean.CacheKey;
 import com.ugym.admin.bean.Motion;
+import com.ugym.admin.bean.OrderData;
 import com.ugym.admin.common.ResultTemplate;
 import com.ugym.admin.dao.MotionDao;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Resource;
+import org.apache.commons.io.IOUtils;
+import org.apache.tools.ant.util.ReaderInputStream;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,10 +38,15 @@ public class DataServiceImpl implements DataService {
 
     private static final long EXPIRE = 30000;
     public static final String ALL_DATA = "XUEN";
+    private static final int NUM = 500;
+    private static final int THREAD_POOL_NUM = 30;
 
 
     @Autowired
     private MotionDao motionDao;
+
+    @Resource(name = "jdbcTemplate")
+    private JdbcTemplate jdbcTemplate;
 
     private LoadingCache<String, List<Motion>> allMotionCache = CacheBuilder.newBuilder()
             .expireAfterAccess(EXPIRE, TimeUnit.MILLISECONDS).maximumSize(100)
@@ -152,5 +174,93 @@ public class DataServiceImpl implements DataService {
                 return allMotionCache.get(ALL_DATA);
             }
         }.executor();
+    }
+
+    String filePath = "tmp/test.csv";
+    File file = new File(filePath);
+    File dir = new File("tmp");
+
+    @Override
+    public List<OrderData> getAllData() throws InterruptedException {
+
+        int count = motionDao.getCount();
+        int threadNum = count % NUM == 0 ? (count / NUM) : (count / NUM + 1);
+        List<OrderData> allData = Lists.newArrayList();
+        CountDownLatch countDownLatch = new CountDownLatch(threadNum);
+        ExecutorService fixedThreadPool = Executors.newFixedThreadPool(THREAD_POOL_NUM);
+        for (int i = 0; i < threadNum; i++) {
+            int j = i;
+            fixedThreadPool.execute(() -> {
+                List<OrderData> dataList = motionDao.getData(j * NUM, NUM);
+                allData.addAll(dataList);
+                countDownLatch.countDown();
+            });
+        }
+        countDownLatch.await();
+        //        List<OrderData> datas = motionDao.getAllData();
+        createCSVFile(allData);
+        // 上传到hdfs
+
+        // 导入到hive
+
+        return allData;
+    }
+
+
+    private void createCSVFile(List<OrderData> orderDataList) {
+
+        try {
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            file.createNewFile();
+            // 创建CSV写对象
+            CsvWriter csvWriter = new CsvWriter(filePath, ',', Charset.forName("UTF-8"));
+            orderDataList.stream().forEach(item -> {
+                String[] s = apdaterStr(item);
+                try {
+                    csvWriter.writeRecord(s);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            csvWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String[] apdaterStr(OrderData item) {
+        String[] s = new String[]{item.getOrder_id().toString(),
+                "order-product:" + item.getOrder_product() + "," +
+                        "main-order:" + item.getMain_order(),
+                item.getCreate_date()};
+        return s;
+    }
+
+    public static void main(String[] args) {
+//        String filePath = "tmp/test.csv";
+//        try {
+//            File file = new File(filePath);
+//            File dir = new File("tmp");
+//
+//            if (!dir.exists()) {
+//                dir.mkdirs();
+//            }
+//
+//            file.createNewFile();
+//            // 创建CSV写对象
+//            CsvWriter csvWriter = new CsvWriter(filePath, ',', Charset.forName("UTF-8"));
+//            //CsvWriter csvWriter = new CsvWriter(filePath);
+//            // 写表头
+//            String[] headers = {"编号", "姓名", "年龄"};
+//            String[] content = {"12365", "张", "35"};
+//            csvWriter.writeRecord(headers);
+//            csvWriter.writeRecord(content);
+//            csvWriter.close();
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 }

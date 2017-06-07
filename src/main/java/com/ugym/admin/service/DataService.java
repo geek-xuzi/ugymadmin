@@ -1,6 +1,7 @@
 package com.ugym.admin.service;
 
 import com.ugym.admin.bean.Motion;
+import com.ugym.admin.bean.OrderData;
 import java.util.List;
 
 /**
@@ -15,4 +16,7 @@ public interface DataService {
     List<Motion> getMotionDataByDay(int day, int month);
 
     List<Motion> getAllMotionData();
+
+    List<OrderData> getAllData() throws InterruptedException;
+
 }
