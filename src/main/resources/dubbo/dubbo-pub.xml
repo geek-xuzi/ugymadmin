@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+  xsi:schemaLocation="http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <dubbo:protocol id="test-protocol" name="dubbo" port="-1"/>
+
+    <dubbo:service interface="com.ugym.admin.bean.DubboTest"
+      ref="dubbotest"
+      version="1.0" register="test1-registry"
+      protocol="test-protocol"/>
+
+
+
+</beans>

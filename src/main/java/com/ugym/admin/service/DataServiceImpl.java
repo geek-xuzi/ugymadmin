@@ -182,13 +182,12 @@ public class DataServiceImpl implements DataService {
 
     @Override
     public List<OrderData> getAllData() throws InterruptedException {
-
         int count = motionDao.getCount();
-        int threadNum = count % NUM == 0 ? (count / NUM) : (count / NUM + 1);
+        int taskNum = count % NUM == 0 ? (count / NUM) : (count / NUM + 1);
         List<OrderData> allData = Lists.newArrayList();
-        CountDownLatch countDownLatch = new CountDownLatch(threadNum);
+        CountDownLatch countDownLatch = new CountDownLatch(taskNum);
         ExecutorService fixedThreadPool = Executors.newFixedThreadPool(THREAD_POOL_NUM);
-        for (int i = 0; i < threadNum; i++) {
+        for (int i = 0; i < taskNum; i++) {
             int j = i;
             fixedThreadPool.execute(() -> {
                 List<OrderData> dataList = motionDao.getData(j * NUM, NUM);
