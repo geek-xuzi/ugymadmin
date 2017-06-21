@@ -1,13 +1,10 @@
 package com.ugym.admin.service;
 
-import com.csvreader.CsvReader;
 import com.csvreader.CsvWriter;
-import com.github.pagehelper.PageHelper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
-import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 import com.ugym.admin.bean.CacheKey;
 import com.ugym.admin.bean.Motion;
 import com.ugym.admin.bean.OrderData;
@@ -15,17 +12,15 @@ import com.ugym.admin.common.ResultTemplate;
 import com.ugym.admin.dao.MotionDao;
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
-import org.apache.commons.io.IOUtils;
-import org.apache.tools.ant.util.ReaderInputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -215,10 +210,9 @@ public class DataServiceImpl implements DataService {
             file.createNewFile();
             // 创建CSV写对象
             CsvWriter csvWriter = new CsvWriter(filePath, ',', Charset.forName("UTF-8"));
-            orderDataList.stream().forEach(item -> {
-                String[] s = apdaterStr(item);
+            orderDataList.stream().map(DataServiceImpl::apdaterStr).forEach(item -> {
                 try {
-                    csvWriter.writeRecord(s);
+                    csvWriter.writeRecord(item);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -229,7 +223,7 @@ public class DataServiceImpl implements DataService {
         }
     }
 
-    private String[] apdaterStr(OrderData item) {
+    private static String[] apdaterStr(OrderData item) {
         String[] s = new String[]{item.getOrder_id().toString(),
                 "order-product:" + item.getOrder_product() + "," +
                         "main-order:" + item.getMain_order(),
@@ -261,5 +255,50 @@ public class DataServiceImpl implements DataService {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
+
+//        MetricRegistry metrics = new MetricRegistry();
+//
+//        //实例化一个Gauge
+//        Gauge<Integer> gauge = new Gauge<Integer>() {
+//            @Override
+//            public Integer getValue() {
+//                return 2;
+//            }
+//        };
+//
+//        //注册到容器中
+//        metrics.register("adasdasd", gauge);
+//
+//        Counter counter = metrics.counter("asdas");
+//
+//        counter.inc();
+//
+//        Histogram randomNums = metrics.histogram("random");
+//
+//        Snapshot snapshot = randomNums.getSnapshot();
+//
+//        SortedMap<String, Gauge> gauges = metrics.getGauges();
+//        System.out.println(gauges.size());
+//        metrics.getTimers();
+//
+//        metrics.getMetrics().entrySet().forEach(item -> {
+//            System.out.println(item.getKey() + item.getValue().getClass().toString());
+//        });
+//
+//        System.out.println(gauge.getValue());
+        while (true) {
+            try {
+                Thread.sleep(1000);
+                String name = ManagementFactory.getRuntimeMXBean().getName();
+                System.out.println(name);
+// get pid
+                String pid = name.split("@")[0];
+                System.out.println("pid" + pid);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
     }
 }
